@@ -1,0 +1,12 @@
+/* Soft rounded frames and deliberate motion language. */
+.heroVisual{clip-path:none!important;border:1px solid rgba(184,160,106,.35);border-radius:28px;overflow:hidden;transition:transform .8s cubic-bezier(.22,1,.36,1),box-shadow .8s ease}.heroVisual:hover{transform:translateY(-8px);box-shadow:0 28px 80px rgba(0,0,0,.45)}
+.service{transition:color .45s ease,transform .45s cubic-bezier(.22,1,.36,1),padding .45s ease}.service:hover{transform:translateX(-6px)}
+.projectList article{transition:color .45s ease,transform .45s cubic-bezier(.22,1,.36,1),padding .45s ease}.projectList article:hover{transform:translateX(-8px)}
+.aboutPhoto,.wowImage{border-radius:28px;overflow:hidden;transition:transform .8s cubic-bezier(.22,1,.36,1),box-shadow .8s ease}.aboutPhoto:hover,.wowImage:hover{transform:translateY(-8px);box-shadow:0 25px 70px rgba(0,0,0,.4)}
+.wowImage img{transition:transform 1.2s cubic-bezier(.22,1,.36,1)}.wowImage:hover img{transform:scale(1.06)}
+.wowCase{border-radius:18px;transition:transform .55s cubic-bezier(.22,1,.36,1),border-color .55s ease,box-shadow .55s ease}.wowCase:hover{transform:translateY(-12px);border-color:rgba(184,160,106,.7);box-shadow:0 25px 55px rgba(0,0,0,.32)}
+.goldBtn,.textLink,.outlineBtn,.navLinks a{transition:color .35s ease,border-color .35s ease,transform .35s ease}.goldBtn:hover,.textLink:hover,.outlineBtn:hover{transform:translateY(-3px)}
+.heroCopy>*{animation:softRise .8s cubic-bezier(.22,1,.36,1) both}.heroCopy .lead{animation-delay:.12s}.heroCopy .heroCtas{animation-delay:.22s}.wowImage{animation:softRise 1s .15s both}
+.site [data-reveal]{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s cubic-bezier(.22,1,.36,1)}.site [data-reveal].is-visible{opacity:1;transform:translateY(0)}
+@keyframes softRise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){.heroVisual,.wowImage,.aboutPhoto{border-radius:20px}.wowCase{border-radius:14px}}
