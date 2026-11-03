@@ -12,10 +12,22 @@ model Project {
   title       String
   description String?
   category    String?
+  categoryId  String?
+  categoryRef Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   status      String   @default("DRAFT")
   imageUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  title     String
+  slug      String    @unique
+  sortOrder Int       @default(0)
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Service {
