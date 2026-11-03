@@ -2,49 +2,28 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { isValidSession, SESSION_COOKIE } from "@/lib/auth";
 
-export const maxDuration = 60;
+export const maxDuration = 30;
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
   if (!isValidSession(cookieStore.get(SESSION_COOKIE)?.value)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "OPENAI_API_KEY is not configured on Vercel" }, { status: 503 });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return NextResponse.json({ error: "GEMINI_API_KEY is not configured on Vercel" }, { status: 503 });
   const body = await request.json();
   const name = String(body.name ?? "").trim();
   const category = String(body.category ?? "").trim();
   const websiteUrl = String(body.websiteUrl ?? "").trim();
   if (!name) return NextResponse.json({ error: "Project name is required" }, { status: 400 });
-
-  const textResponse = await fetch("https://api.openai.com/v1/responses", {
+  const prompt = `أنت كاتب محتوى لشركة SCORPION. اكتب وصفًا رسميًا فاخرًا لمشروع في البورتفوليو. أرجع JSON فقط بالمفتاحين title و description. العنوان عربي واضح ويمكن إضافة English title بين قوسين. الوصف من جملة إلى جملتين، جذاب واحترافي، ولا تخترع أرقامًا أو عملاء أو تقنيات غير مذكورة. اسم المشروع: ${name}. القسم: ${category || "غير محدد"}. الرابط: ${websiteUrl || "غير متوفر"}.`;
+  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: "gpt-4.1-mini",
-      input: `Write a concise, premium corporate portfolio description for SCORPION. Return JSON only with keys title and description. Arabic should be the primary language, with a polished English title in parentheses when useful. Project name: ${name}. Category: ${category}. Website: ${websiteUrl || "not provided"}. Do not invent specific facts, numbers, clients, or technologies.`
-    })
+    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.7, maxOutputTokens: 300 } })
   });
-  if (!textResponse.ok) return NextResponse.json({ error: "AI text generation failed" }, { status: 502 });
-  const textJson = await textResponse.json();
-  const outputText = textJson.output_text || textJson.output?.flatMap((item: { content?: { text?: string }[] }) => item.content || []).map((part: { text?: string }) => part.text || "").join("") || "";
-  let generated = { title: name, description: "حل رقمي مصمم بعناية ليقدم تجربة واضحة واحترافية." };
-  try { generated = { ...generated, ...JSON.parse(outputText.replace(/```json|```/g, "").trim()) }; } catch { /* keep safe fallback */ }
-
-  const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: "gpt-image-1.5",
-      prompt: `Premium editorial portfolio cover image for a corporate digital project named ${name}, category ${category || "digital solutions"}. Black vantablack background, matte gold accents, cinematic studio lighting, elegant architectural composition, no readable text, no logos, no watermark, formal luxury brand direction.`,
-      size: "1024x1024",
-      quality: "medium",
-      n: 1
-    })
-  });
-  let imageDataUrl = "";
-  if (imageResponse.ok) {
-    const imageJson = await imageResponse.json();
-    const base64 = imageJson.data?.[0]?.b64_json;
-    if (base64) imageDataUrl = `data:image/png;base64,${base64}`;
-  }
-  return NextResponse.json({ ...generated, imageDataUrl });
+  if (!response.ok) return NextResponse.json({ error: "Gemini generation failed" }, { status: 502 });
+  const json = await response.json();
+  const output = json.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text || "").join("") || "";
+  let result = { title: name, description: "حل رقمي مصمم بعناية ليقدم تجربة واضحة واحترافية." };
+  try { result = { ...result, ...JSON.parse(output.replace(/```json|```/g, "").trim()) }; } catch { /* safe fallback */ }
+  return NextResponse.json({ ...result, imageDataUrl: "" });
 }
