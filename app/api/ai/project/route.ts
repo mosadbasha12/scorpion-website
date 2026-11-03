@@ -14,8 +14,8 @@ export async function POST(request: Request) {
   const category = String(body.category ?? "").trim();
   const websiteUrl = String(body.websiteUrl ?? "").trim();
   if (!name) return NextResponse.json({ error: "Project name is required" }, { status: 400 });
-  const prompt = `أنت كاتب محتوى لشركة SCORPION. اكتب وصفًا رسميًا فاخرًا لمشروع في البورتفوليو. أرجع JSON فقط بالمفتاحين title و description. العنوان عربي واضح ويمكن إضافة English title بين قوسين. الوصف من جملة إلى جملتين، جذاب واحترافي، ولا تخترع أرقامًا أو عملاء أو تقنيات غير مذكورة. اسم المشروع: ${name}. القسم: ${category || "غير محدد"}. الرابط: ${websiteUrl || "غير متوفر"}.`;
-  const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.7, maxOutputTokens: 300 } };
+  const prompt = `أنت مدير إبداعي وكاتب محتوى فاخر لشركة SCORPION. حلّل الموقع الموجود على الرابط ${websiteUrl || "غير متوفر"} باستخدام أداة URL context، واقرأ ما يظهر فيه من هوية ومحتوى وأقسام وطريقة عرض وتجربة مستخدم. اكتب وصف بورتفوليو يجعل العميل يشعر أن المشروع يستحق الزيارة ويثير فضوله، من غير مبالغة أو اختراع معلومات. أرجع JSON فقط بالمفتاحين title و description. العنوان يكون اسم المشروع كما يظهر في الموقع أو اسمًا أدق منه، ويمكن إضافة English title بين قوسين. الوصف من 2 إلى 4 جمل عربية رسمية، يصف التجربة والتفاصيل المميزة ودعوة ذكية لزيارة الموقع. اسم المشروع المدخل: ${name}. القسم: ${category || "غير محدد"}.`;
+  const payload = { contents: [{ parts: [{ text: prompt }] }], tools: [{ url_context: {} }], generationConfig: { responseMimeType: "application/json", temperature: 0.8, maxOutputTokens: 500 } };
   const models = ["gemini-3.8-flash", "gemini-3.5-flash-lite"];
   let json: { candidates?: { content?: { parts?: { text?: string }[] } }[] } | null = null;
   let lastError = "تعذر الاتصال بخدمة Gemini";
