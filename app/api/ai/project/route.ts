@@ -20,7 +20,13 @@ export async function POST(request: Request) {
     headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.7, maxOutputTokens: 300 } })
   });
-  if (!response.ok) return NextResponse.json({ error: "Gemini generation failed" }, { status: 502 });
+  if (!response.ok) {
+    const providerBody = await response.text();
+    console.error("Gemini API error", response.status, providerBody.slice(0, 1000));
+    let detail = "تعذر الاتصال بخدمة Gemini";
+    try { detail = JSON.parse(providerBody)?.error?.message || detail; } catch { /* keep safe fallback */ }
+    return NextResponse.json({ error: `Gemini generation failed: ${detail}` }, { status: 502 });
+  }
   const json = await response.json();
   const output = json.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text || "").join("") || "";
   let result = { title: name, description: "حل رقمي مصمم بعناية ليقدم تجربة واضحة واحترافية." };
