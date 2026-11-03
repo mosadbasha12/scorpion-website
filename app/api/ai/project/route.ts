@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const websiteUrl = String(body.websiteUrl ?? "").trim();
   if (!name) return NextResponse.json({ error: "Project name is required" }, { status: 400 });
   const prompt = `أنت كاتب محتوى لشركة SCORPION. اكتب وصفًا رسميًا فاخرًا لمشروع في البورتفوليو. أرجع JSON فقط بالمفتاحين title و description. العنوان عربي واضح ويمكن إضافة English title بين قوسين. الوصف من جملة إلى جملتين، جذاب واحترافي، ولا تخترع أرقامًا أو عملاء أو تقنيات غير مذكورة. اسم المشروع: ${name}. القسم: ${category || "غير محدد"}. الرابط: ${websiteUrl || "غير متوفر"}.`;
-  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
+  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.7, maxOutputTokens: 300 } })
