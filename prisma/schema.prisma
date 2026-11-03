@@ -16,6 +16,9 @@ model Project {
   categoryRef Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   status      String   @default("DRAFT")
   imageUrl    String?
+  logoUrl     String?
+  websiteUrl  String?
+  coverUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
